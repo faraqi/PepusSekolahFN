@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perpustakaan Digital SMKN 1 Ketapang</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f0f2f5}
+.sidebar{width:260px;height:100vh;position:fixed;left:0;top:0;background:linear-gradient(180deg,#1e3a8a 0%,#1e293b 100%);color:white;padding:0;transition:all 0.3s ease;z-index:1000;box-shadow:4px 0 10px rgba(0,0,0,0.1);overflow-y:auto}
+.sidebar.collapsed{width:70px}
+.sidebar-header{padding:20px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);transition:background 0.2s;cursor:pointer}
+.sidebar-header:hover{background:rgba(0,0,0,0.35)}
+.sidebar-header img{width:60px;height:60px;border-radius:50%;margin-bottom:10px;border:3px solid white;object-fit:cover}
+.sidebar.collapsed .sidebar-header img{width:40px;height:40px}
+.sidebar-header h5{font-size:16px;font-weight:600;margin:10px 0 5px 0;transition:opacity 0.3s}
+.sidebar-header small{font-size:12px;color:#94a3b8;transition:opacity 0.3s}
+.sidebar.collapsed .sidebar-header h5,.sidebar.collapsed .sidebar-header small{opacity:0;display:none}
+.user-info{padding:15px 20px;background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.1)}
+.user-info .badge{font-size:10px;padding:4px 8px}
+.sidebar.collapsed .user-info span{display:none}
+.sidebar-menu{padding:20px 0}
+.sidebar-menu a{display:flex;align-items:center;padding:12px 20px;color:#cbd5e1;text-decoration:none;transition:all 0.3s;position:relative}
+.sidebar-menu a i{width:30px;font-size:18px;margin-right:15px;transition:all 0.3s}
+.sidebar.collapsed .sidebar-menu a{justify-content:center}
+.sidebar.collapsed .sidebar-menu a i{margin-right:0}
+.sidebar.collapsed .sidebar-menu a span{display:none}
+.sidebar-menu a:hover{background:rgba(255,255,255,0.1);color:white;padding-left:25px}
+.sidebar.collapsed .sidebar-menu a:hover{padding-left:20px}
+.sidebar-menu a.active{background:rgba(255,255,255,0.15);color:white;border-left:4px solid #3b82f6}
+.content{margin-left:260px;padding:20px;transition:margin-left 0.3s ease;min-height:100vh}
+.content.expanded{margin-left:70px}
+.top-bar{background:white;padding:15px 25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:25px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
+.top-bar h4{margin:0;color:#1e293b;font-size:24px}
+.stat-card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.05);transition:transform 0.3s,box-shadow 0.3s;border-left:4px solid}
+.stat-card:hover{transform:translateY(-5px);box-shadow:0 5px 20px rgba(0,0,0,0.1)}
+.stat-card.primary{border-color:#3b82f6}
+.stat-card.success{border-color:#10b981}
+.stat-card.warning{border-color:#f59e0b}
+.stat-card.info{border-color:#06b6d4}
+.stat-card h6{color:#64748b;font-size:14px;margin-bottom:10px}
+.stat-card h2{color:#1e293b;font-size:32px;font-weight:700;margin:0}
+.stat-card i{font-size:40px;opacity:0.2}
+.book-card{background:white;border-radius:12px;padding:20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:all 0.3s;height:100%;display:flex;flex-direction:column}
+.book-card:hover{transform:translateY(-5px);box-shadow:0 5px 15px rgba(0,0,0,0.15)}
+.book-icon{font-size:60px;margin-bottom:15px;color:#3b82f6}
+.book-card h6{font-weight:600;color:#1e293b;margin:10px 0;min-height:40px;font-size:15px}
+.book-card small{color:#64748b;display:block;margin-bottom:10px}
+.book-stats{display:flex;justify-content:space-around;margin:15px 0;padding:10px 0;border-top:1px solid #e2e8f0;flex-grow:1;align-items:center}
+.book-stats span{font-size:12px;color:#64748b}
+.book-card .btn-group{margin-top:auto}
+
+/* LOGIN */
+.login-page{min-height:100vh;display:flex;justify-content:center;align-items:center;background:url('https://smkn1ketapang.sch.id/wp-content/uploads/2025/06/WhatsApp-Image-2022-11-28-at-09.10.29-600x450.jpeg') center center/cover no-repeat fixed;position:relative;overflow:hidden}
+.login-page::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.login-box{background:rgba(255,255,255,0.18);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.35);padding:36px 32px;border-radius:24px;width:430px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.4);position:relative;z-index:1;animation:fadeIn 0.5s ease}
+.logo-section{text-align:center;margin-bottom:24px}
+.logo-section img{width:84px;height:84px;border-radius:50%;margin-bottom:12px;border:3px solid rgba(255,255,255,0.8);box-shadow:0 4px 16px rgba(0,0,0,0.3);object-fit:cover}
+.logo-section h5{color:white;font-weight:800;font-size:16px;letter-spacing:0.5px;text-shadow:0 1px 4px rgba(0,0,0,0.4);margin:0 0 4px 0;text-transform:uppercase}
+.logo-section h6{color:rgba(255,255,255,0.9);font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0;text-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.lf{background:rgba(255,255,255,0.15)!important;border:1.5px solid rgba(255,255,255,0.4)!important;border-radius:12px!important;padding:13px 16px!important;color:white!important;font-size:15px;transition:all 0.25s}
+.lf::placeholder{color:rgba(255,255,255,0.65)!important}
+.lf:focus{background:rgba(255,255,255,0.25)!important;border-color:rgba(255,255,255,0.8)!important;box-shadow:0 0 0 3px rgba(255,255,255,0.15)!important;color:white!important;outline:none}
+.lf option{background:#1e3a8a;color:white}
+.btn-login{background:#2563eb;color:white;padding:13px;border-radius:12px;font-weight:700;font-size:16px;border:none;transition:all 0.3s;width:100%;cursor:pointer;box-shadow:0 4px 14px rgba(37,99,235,0.5)}
+.btn-login:hover{background:#1d4ed8;transform:translateY(-2px);box-shadow:0 8px 20px rgba(37,99,235,0.55);color:white}
+.btn-daftar{background:rgba(255,255,255,0.12);color:white;padding:11px;border-radius:12px;font-weight:600;font-size:14px;border:1.5px solid rgba(255,255,255,0.45);transition:all 0.3s;width:100%;cursor:pointer;margin-top:2px}
+.btn-daftar:hover{background:rgba(255,255,255,0.22);color:white;transform:translateY(-1px)}
+.login-divider{display:flex;align-items:center;margin:14px 0;color:rgba(255,255,255,0.45);font-size:12px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.22)}
+.login-divider span{padding:0 12px}
+.role-badge{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:8px 14px;color:white;font-size:12px;display:none;margin-top:6px;animation:fadeIn 0.3s ease}
+.notif-bar{border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.notif-err{background:rgba(239,68,68,0.28);border:1px solid rgba(239,68,68,0.5);color:white}
+.notif-ok{background:rgba(16,185,129,0.28);border:1px solid rgba(16,185,129,0.5);color:white}
+.notif-info{background:rgba(59,130,246,0.28);border:1px solid rgba(59,130,246,0.5);color:white}
+.daftar-panel{display:none;animation:fadeIn 0.4s ease}
+.back-btn{background:none;border:none;color:rgba(255,255,255,0.75);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px;display:flex;align-items:center;gap:6px;transition:color 0.2s}
+.back-btn:hover{color:white}
+.role-selector{display:flex;gap:10px;margin-bottom:14px}
+.role-opt{flex:1;padding:11px 8px;border:2px solid rgba(255,255,255,0.28);border-radius:12px;text-align:center;cursor:pointer;color:rgba(255,255,255,0.65);transition:all 0.25s;font-size:13px;font-weight:600;background:rgba(255,255,255,0.07)}
+.role-opt:hover{border-color:rgba(255,255,255,0.65);color:white;background:rgba(255,255,255,0.14)}
+.role-opt.selected{border-color:#60a5fa;color:white;background:rgba(59,130,246,0.28)}
+.role-opt i{display:block;font-size:22px;margin-bottom:5px}
+.kelas-field{display:none;animation:fadeIn 0.3s ease}
+
+/* PENDING */
+.pending-badge-anim{background:linear-gradient(135deg,#f59e0b,#d97706);animation:pulseBadge 1.5s infinite;border-radius:20px;padding:3px 9px;font-size:11px;color:white;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+@keyframes pulseBadge{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.85;transform:scale(1.05)}}
+.pending-card{background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border-left:4px solid #f59e0b;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;transition:all 0.2s;margin-bottom:12px}
+.pending-card:hover{box-shadow:0 4px 18px rgba(0,0,0,0.12)}
+.pending-section{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-top:20px}
+
+.history-item{background:white;padding:15px;border-radius:8px;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.05);display:flex;align-items:center;justify-content:space-between}
+.history-item i{color:#3b82f6;margin-right:10px}
+.chart-container{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-top:20px}
+.modal-header{background:linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%);color:white;border-radius:12px 12px 0 0}
+.modal-header .btn-close{filter:brightness(0) invert(1)}
+.modal-body{padding:25px}
+.book-detail-section{margin-bottom:20px}
+.book-detail-section h6{color:#1e293b;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.book-detail-section p{color:#64748b;margin:0;line-height:1.6}
+.badge-kategori{font-size:12px;padding:5px 12px}
+#pdfReaderModal .modal-dialog{max-width:92vw;width:92vw;height:92vh;margin:2vh auto}
+#pdfReaderModal .modal-content{height:100%;border-radius:12px;overflow:hidden}
+#pdfReaderModal .modal-header{flex-shrink:0;padding:12px 20px}
+#pdfReaderModal .modal-body{padding:0;flex:1;overflow:hidden}
+#pdfViewer{width:100%;height:100%;border:none;display:block}
+.filter-section{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);margin-bottom:20px}
+.mobile-topbar{display:none;position:fixed;top:0;left:0;right:0;height:56px;background:linear-gradient(90deg,#1e3a8a,#1e40af);z-index:1100;align-items:center;padding:0 16px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+@media(min-width:769px){.mobile-topbar{display:none!important}}
+.mobile-topbar .hamburger{background:none;border:none;color:white;font-size:22px;cursor:pointer;padding:4px 8px;border-radius:6px;flex-shrink:0}
+.mobile-topbar .hamburger:hover{background:rgba(255,255,255,0.15)}
+.mobile-topbar .mobile-title{color:white;font-size:15px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mobile-topbar .mobile-user-badge{background:rgba(255,255,255,0.2);color:white;font-size:11px;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;backdrop-filter:blur(2px)}
+.sidebar-overlay.active{display:block}
+@media(max-width:768px){
+  .mobile-topbar{display:flex}
+  .sidebar{transform:translateX(-100%);width:260px!important;transition:transform 0.3s ease;z-index:1050;padding-top:56px}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .content{margin-left:0!important;padding:76px 12px 20px 12px}
+  .content.expanded{margin-left:0!important}
+  .top-bar{flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px}
+  .top-bar h4{font-size:16px;margin:0}
+  .top-bar>div{width:100%;flex-wrap:wrap}
+  .top-bar .btn{font-size:12px;padding:5px 10px}
+  .stat-card{padding:14px}
+  .stat-card h2{font-size:22px}
+  .stat-card i{font-size:24px}
+  #listBuku .col-md-3{width:50%}
+  .book-card{padding:14px 10px}
+  .book-card h6{font-size:13px}
+  #topBukuList .col-md-6{width:100%}
+  .filter-section{padding:14px}
+  .filter-section .col-md-3{width:100%}
+  .chart-container{padding:14px}
+  .history-item{flex-direction:column;align-items:flex-start;gap:4px;padding:10px 14px}
+  .history-item small{align-self:flex-end}
+  .seleksi-toolbar{padding:10px 14px}
+  .seleksi-toolbar .ms-auto{margin-left:0!important;width:100%;justify-content:flex-end}
+  #statistikPage .col-md-7,#statistikPage .col-md-5{width:100%}
+  #statistikPage .col-md-3{width:50%}
+  .table-responsive{font-size:12px}
+  .login-box{width:92%;padding:24px 18px}
+  #pdfReaderModal .modal-dialog{max-width:100vw!important;margin:0!important;height:100dvh}
+  #pdfReaderModal .modal-content{height:100dvh!important;border-radius:0!important}
+  .role-selector{flex-direction:column}
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#f1f1f1}
+::-webkit-scrollbar-thumb{background:#888;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#555}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.5s ease-in-out}
+.loading-spinner{display:inline-block;width:20px;height:20px;border:3px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#statistikPage canvas{max-height:320px}
+.table th{font-size:13px;color:#475569;font-weight:600}
+.table td{font-size:13px;vertical-align:middle}
+.history-item:hover{background:#f8fafc}
+#resetRiwayatModal .modal-content,#resetStatistikModal .modal-content,#suksesModal .modal-content{border-radius:14px;overflow:hidden;border:none;box-shadow:0 15px 50px rgba(0,0,0,0.2)}
+.top-bar .btn{white-space:nowrap}
+.seleksi-toolbar{background:#1e3a8a;color:white;padding:12px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(30,58,138,0.3);animation:fadeIn 0.3s ease}
+.seleksi-toolbar .form-check-input{width:18px;height:18px;cursor:pointer;border:2px solid white}
+.seleksi-toolbar .form-check-label{color:white;cursor:pointer}
+.seleksi-toolbar .text-muted{color:#93c5fd!important}
+.history-item-selectable{cursor:pointer;transition:background 0.2s,border 0.2s;border:2px solid transparent}
+.history-item-selectable:hover{background:#eff6ff;border-color:#bfdbfe}
+.history-item-selectable.selected{background:#dbeafe;border-color:#3b82f6}
+.history-item-selectable .item-checkbox{display:none;margin-right:12px}
+.history-item-selectable .item-checkbox input{width:18px;height:18px;cursor:pointer;accent-color:#3b82f6}
+.mode-seleksi-aktif .history-item-selectable .item-checkbox{display:flex;align-items:center}
+.history-item-hapus{opacity:0;transition:opacity 0.2s}
+.history-item:hover .history-item-hapus,.history-item-selectable:hover .history-item-hapus{opacity:1}
+.btn-xs{padding:2px 7px;font-size:11px;border-radius:5px;line-height:1.5}
+.top-buku-card{background:white;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:all 0.25s;border:2px solid transparent;height:100%}
+.top-buku-card:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(0,0,0,0.12);border-color:#bfdbfe}
+.rank-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.progress{background:#e2e8f0}
+#userDashboardView .chart-container{margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage" class="login-page">
+  <div class="login-box fade-in">
+    <div class="logo-section">
+      <img src="logo.png" alt="Logo">
+      <h5>Sistem Informasi<br>Perpustakaan Digital</h5>
+      <h6>SMKN 1 Ketapang</h6>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div id="loginPanel">
+      <form onsubmit="event.preventDefault();login();">
+        <div class="mb-3">
+          <input id="username" class="lf form-control" placeholder="Username" required autocomplete="off" oninput="detectRole()">
+          <div id="roleBadge" class="role-badge"></div>
+        </div>
+        <div class="mb-3">
+          <input id="password" type="password" class="lf form-control" placeholder="Password" required>
+        </div>
+        <div id="loginNotif"></div>
+        <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt me-2"></i>Login</button>
+      </form>
+      <div class="login-divider"><span>atau</span></div>
+      <button class="btn-daftar" onclick="showDaftarPanel()"><i class="fas fa-user-plus me-2"></i>Daftar Akun Baru</button>
+    </div>
+
+    <!-- DAFTAR PANEL -->
+    <div id="daftarPanel" class="daftar-panel">
+      <button class="back-btn" onclick="showLoginPanel()"><i class="fas fa-arrow-left"></i> Kembali ke Login</button>
+      <div class="mb-2">
+        <p style="color:white;font-weight:700;font-size:15px;margin-bottom:2px;">Daftar Akun Baru</p>
+        <p style="color:rgba(255,255,255,0.6);font-size:12px;margin-bottom:14px;">Pilih peran, isi data, lalu kirim permohonan</p>
+      </div>
+      <div class="role-selector">
+        <div class="role-opt" id="roleOptGuru" onclick="selectRoleDaftar('guru')"><i class="fas fa-chalkboard-teacher"></i>Guru</div>
+        <div class="role-opt" id="roleOptSiswa" onclick="selectRoleDaftar('siswa')"><i class="fas fa-user-graduate"></i>Siswa</div>
+      </div>
+      <form onsubmit="event.preventDefault();daftarAkun();">
+        <div class="mb-3"><input id="daftarUsername" class="lf form-control" placeholder="Username (unik)" required autocomplete="off"></div>
+        <div class="mb-3"><input id="daftarNama" class="lf form-control" placeholder="Nama Lengkap" required></div>
+        <div class="mb-3 kelas-field" id="kelasField"><input id="daftarKelas" class="lf form-control" placeholder="Kelas (contoh: X RPL 1)"></div>
+        <div class="mb-3"><input id="daftarPassword" type="password" class="lf form-control" placeholder="Password" required></div>
+        <div class="mb-3"><input id="daftarKonfirm" type="password" class="lf form-control" placeholder="Konfirmasi Password" required></div>
+        <div id="daftarNotif"></div>
+        <button type="submit" class="btn-login"><i class="fas fa-paper-plane me-2"></i>Kirim Permohonan</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY & MOBILE BAR -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMobile()"></div>
+<div class="mobile-topbar" id="mobileTopbar" style="display:none !important;">
+  <button class="hamburger" onclick="toggleSidebarMobile()"><i class="fas fa-bars" id="hamburgerIcon"></i></button>
+  <span class="mobile-title">Perpustakaan Digital</span>
+  <span class="mobile-user-badge" id="mobileUserBadge">-</span>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="mainApp" style="display:none;">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header" onclick="toggleSidebar()">
+      <img src="logo.png" alt="Logo">
+      <h5>Perpustakaan Digital</h5>
+      <small>SMKN 1 Ketapang</small>
+    </div>
+    <div class="user-info">
+      <div class="d-flex align-items-center">
+        <i class="fas fa-user-circle" style="font-size:30px;margin-right:10px;"></i>
+        <div>
+          <div><strong id="displayUsername">User</strong></div>
+          <span class="badge bg-primary" id="displayRole">Role</span>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-menu">
+      <a href="#" class="active" onclick="showPage('dashboard')"><i class="fas fa-home"></i><span>Dashboard</span></a>
+      <a href="#" onclick="showPage('buku')"><i class="fas fa-book"></i><span>Daftar Buku</span></a>
+      <a href="#" onclick="showPage('riwayat')"><i class="fas fa-history"></i><span>Riwayat Bacaan</span></a>
+      <a href="#" id="menuTambah" onclick="showPage('tambah')"><i class="fas fa-plus-circle"></i><span>Tambah Buku</span></a>
+      <a href="#" id="menuStatistik" onclick="showPage('statistik')"><i class="fas fa-chart-bar"></i><span>Statistik</span></a>
+      <a href="#" id="menuManajemen" onclick="showPage('manajemen')"><i class="fas fa-users"></i><span>Manajemen User</span></a>
+      <a href="#" id="menuPendaftar" onclick="showPage('pendaftar')" style="display:none;">
+        <i class="fas fa-user-clock"></i>
+        <span>Pendaftar <span id="sidebarPendingBadge" class="badge bg-warning text-dark ms-1" style="display:none;font-size:10px;">0</span></span>
+      </a>
+      <hr style="border-color:rgba(255,255,255,0.1);margin:15px 0;">
+      <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+
+    <!-- DASHBOARD -->
+    <div id="dashboardPage">
+      <div class="top-bar">
+        <h4><i class="fas fa-home me-2"></i>Dashboard</h4>
+        <small class="text-muted" id="currentDate"></small>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-3"><div class="stat-card primary"><div class="d-flex justify-content-between align-items-center"><div><h6>Total Buku</h6><h2 id="totalBuku">0</h2></div><i class="fas fa-book"></i></div></div></div>
+        <div class="col-md-3"><div class="stat-card success"><div class="d-flex justify-content-between align-items-center"><div><h6 id="labelBacaDashboard">Buku Dibaca</h6><h2 id="totalBaca">0</h2></div><i class="fas fa-book-reader"></i></div></div></div>
+        <div class="col-md-3" id="statUser"><div class="stat-card warning"><div class="d-flex justify-content-between align-items-center"><div><h6>Total User</h6><h2 id="totalUser">0</h2></div><i class="fas fa-users"></i></div></div></div>
+        <div class="col-md-3"><div class="stat-card info"><div class="d-flex justify-content-between align-items-center"><div><h6>Buku Terpopuler</h6><h2 id="bukuPopuler">-</h2></div><i class="fas fa-star"></i></div></div></div>
+      </div>
+
+      <!-- Pending notif admin -->
+      <div id="pendingNotifDashboard" style="display:none;" class="pending-section">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="mb-0"><i class="fas fa-user-clock me-2 text-warning"></i>Permohonan Akun Menunggu Persetujuan</h6>
+          <button class="btn btn-sm btn-warning" onclick="showPage('pendaftar')"><i class="fas fa-arrow-right me-1"></i>Kelola</button>
+        </div>
+        <div id="pendingPreviewList"></div>
+      </div>
+
+      <div id="adminDashboardView">
+        <div class="chart-container"><h6 class="mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Grafik Pembacaan Buku</h6><canvas id="chartBuku" height="80"></canvas></div>
+        <div class="chart-container" id="recentActivity"><h6 class="mb-3"><i class="fas fa-clock me-2"></i>Aktivitas Terbaru (Semua User)</h6><div id="recentList"></div></div>
+      </div>
+      <div id="userDashboardView" style="display:none;">
+        <div class="chart-container mt-0"><h6 class="mb-3"><i class="fas fa-fire me-2 text-danger"></i>Buku Terpopuler & Sering Dibaca</h6><div class="row g-3" id="topBukuList"></div><div id="emptyTopBuku" style="display:none;" class="text-center py-4 text-muted"><i class="fas fa-book fa-3x mb-2 d-block"></i>Belum ada buku</div></div>
+        <div class="chart-container"><div class="d-flex justify-content-between align-items-center mb-3"><h6 class="mb-0"><i class="fas fa-history me-2 text-success"></i>Riwayat Bacaan Saya</h6><small class="text-muted" id="totalRiwayatDashboard"></small></div><div id="recentListUser"></div></div>
+      </div>
+    </div>
+
+    <!-- BUKU -->
+    <div id="bukuPage" style="display:none;">
+      <div class="top-bar">
+        <h4><i class="fas fa-book me-2"></i>Daftar Buku</h4>
+        <div class="d-flex gap-2">
+          <select id="filterKategori" class="form-control" style="width:200px;" onchange="renderBuku()">
+            <option value="">Semua Kategori</option>
+            <option>Fiksi</option><option>Non-Fiksi</option><option>Sains</option><option>Teknologi</option>
+            <option>Sejarah</option><option>Biografi</option><option>Pendidikan</option><option>Agama</option>
+          </select>
+          <input type="text" id="searchBuku" class="form-control" style="width:300px;" placeholder="🔍 Cari buku..." oninput="renderBuku()">
+        </div>
+      </div>
+      <div class="row g-3" id="listBuku"></div>
+      <div id="emptyBuku" style="display:none;" class="text-center mt-5"><i class="fas fa-book" style="font-size:80px;color:#cbd5e1;"></i><h5 class="mt-3 text-muted">Belum ada buku</h5></div>
+    </div>
+
+    <!-- TAMBAH -->
+    <div id="tambahPage" style="display:none;">
+      <div class="top-bar"><h4><i class="fas fa-plus-circle me-2"></i>Tambah Buku</h4></div>
+      <div class="row"><div class="col-md-8"><div style="background:white;padding:30px;border-radius:12px;">
+        <form onsubmit="event.preventDefault();tambahBuku();">
+          <div class="mb-3"><label class="form-label">Judul Buku</label><input id="judul" class="form-control" placeholder="Masukkan judul buku" required></div>
+          <div class="mb-3"><label class="form-label">Penulis</label><input id="penulis" class="form-control" placeholder="Masukkan nama penulis" required></div>
+          <div class="mb-3"><label class="form-label">Kategori</label><select id="kategori" class="form-control" required><option value="">Pilih Kategori</option><option>Fiksi</option><option>Non-Fiksi</option><option>Sains</option><option>Teknologi</option><option>Sejarah</option><option>Biografi</option><option>Pendidikan</option><option>Agama</option></select></div>
+          <div class="mb-3"><label class="form-label">File PDF</label><input type="file" id="pdfFile" accept="application/pdf" class="form-control" required><small class="text-muted">Format: PDF | Max: 10MB</small></div>
+          <div class="mb-3"><label class="form-label">Deskripsi</label><textarea id="deskripsi" class="form-control" rows="4" placeholder="Deskripsi singkat buku..." required></textarea></div>
+          <button type="submit" class="btn btn-success"><i class="fas fa-save me-2"></i>Simpan Buku</button>
+        </form>
+      </div></div></div>
+    </div>
+
+    <!-- RIWAYAT -->
+    <div id="riwayatPage" style="display:none;">
+      <div class="top-bar"><h4><i class="fas fa-history me-2"></i>Riwayat Bacaan</h4><div class="d-flex gap-2 flex-wrap" id="riwayatButtons"></div></div>
+      <div id="toolbarSeleksi" style="display:none;" class="seleksi-toolbar mb-3">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="checkAll" onchange="toggleCheckAll(this)"><label class="form-check-label fw-semibold" for="checkAll">Pilih Semua</label></div>
+          <span class="text-muted" id="jumlahDipilih">0 dipilih</span>
+          <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-sm btn-secondary" onclick="toggleModeSeleksi()"><i class="fas fa-times me-1"></i>Batal</button>
+            <button class="btn btn-sm btn-danger" onclick="hapusRiwayatTerpilih()" id="btnHapusTerpilih" disabled><i class="fas fa-trash me-1"></i>Hapus Terpilih (<span id="countTerpilih">0</span>)</button>
+          </div>
+        </div>
+      </div>
+      <div class="filter-section">
+        <h6 class="mb-3"><i class="fas fa-filter me-2"></i>Filter Riwayat</h6>
+        <div class="row g-3">
+          <div class="col-md-3" id="filterUserCol"><label class="form-label">User</label><select id="filterUser" class="form-control" onchange="renderRiwayat()"><option value="all">Semua User</option></select></div>
+          <div class="col-md-3"><label class="form-label">Tanggal Mulai</label><input type="date" id="filterTanggalMulai" class="form-control" onchange="renderRiwayat()"></div>
+          <div class="col-md-3"><label class="form-label">Tanggal Akhir</label><input type="date" id="filterTanggalAkhir" class="form-control" onchange="renderRiwayat()"></div>
+          <div class="col-md-3"><label class="form-label">Cari Buku</label><input type="text" id="filterBuku" class="form-control" placeholder="Nama buku..." oninput="renderRiwayat()"></div>
+        </div>
+        <div class="mt-3 d-flex align-items-center gap-3">
+          <button class="btn btn-sm btn-secondary" onclick="resetFilter()"><i class="fas fa-redo me-1"></i>Reset Filter</button>
+          <span class="text-muted" id="totalRiwayat">Total: 0 riwayat</span>
+        </div>
+      </div>
+      <div id="riwayatList"></div>
+      <div id="emptyRiwayat" style="display:none;" class="text-center mt-5"><i class="fas fa-history" style="font-size:80px;color:#cbd5e1;"></i><h5 class="mt-3 text-muted">Belum ada riwayat</h5></div>
+    </div>
+
+    <!-- STATISTIK -->
+    <div id="statistikPage" style="display:none;">
+      <div class="top-bar"><h4><i class="fas fa-chart-bar me-2"></i>Statistik & Laporan</h4><div class="d-flex gap-2"><button class="btn btn-sm btn-outline-primary" onclick="renderStatistik()"><i class="fas fa-sync-alt me-1"></i>Refresh</button><button class="btn btn-sm btn-warning" onclick="showResetStatistikModal('counter')"><i class="fas fa-undo me-1"></i>Reset Counter</button><button class="btn btn-sm btn-danger" onclick="showResetStatistikModal('all')"><i class="fas fa-trash-alt me-1"></i>Reset Semua</button></div></div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="stat-card primary"><div class="d-flex justify-content-between align-items-center"><div><h6>Total Buku</h6><h2 id="statTotalBuku">0</h2></div><i class="fas fa-book"></i></div></div></div>
+        <div class="col-md-3"><div class="stat-card success"><div class="d-flex justify-content-between align-items-center"><div><h6>Total Pembacaan</h6><h2 id="statTotalBaca">0</h2></div><i class="fas fa-book-reader"></i></div></div></div>
+        <div class="col-md-3"><div class="stat-card warning"><div class="d-flex justify-content-between align-items-center"><div><h6>Total User</h6><h2 id="statTotalUser">0</h2></div><i class="fas fa-users"></i></div></div></div>
+        <div class="col-md-3"><div class="stat-card info"><div class="d-flex justify-content-between align-items-center"><div><h6>Buku Terpopuler</h6><h2 id="statBukuPopuler">0</h2><small id="statNamaBukuPopuler" style="color:#64748b;font-size:11px;"></small></div><i class="fas fa-fire"></i></div></div></div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-7"><div class="chart-container"><h6 class="mb-3"><i class="fas fa-trophy me-2 text-warning"></i>Top 10 Buku Terpopuler</h6><div id="emptyChartPopuler" style="display:none;" class="text-center py-4 text-muted">Belum ada data</div><canvas id="chartPopuler" height="200"></canvas></div></div>
+        <div class="col-md-5"><div class="chart-container"><h6 class="mb-3"><i class="fas fa-tags me-2 text-info"></i>Buku per Kategori</h6><div id="emptyChartKategori" style="display:none;" class="text-center py-4 text-muted">Belum ada data</div><canvas id="chartKategori" height="200"></canvas></div></div>
+      </div>
+      <div class="row g-3 mt-1">
+        <div class="col-md-7"><div class="chart-container"><h6 class="mb-3"><i class="fas fa-user-friends me-2 text-success"></i>Aktivitas per User</h6><div id="emptyChartUser" style="display:none;" class="text-center py-4 text-muted">Belum ada aktivitas</div><canvas id="chartUser" height="150"></canvas></div></div>
+        <div class="col-md-5"><div class="chart-container"><h6 class="mb-3"><i class="fas fa-medal me-2 text-danger"></i>User Teraktif</h6><div id="topUserList"></div></div></div>
+      </div>
+      <div class="chart-container mt-1"><h6 class="mb-3"><i class="fas fa-list me-2 text-primary"></i>Riwayat Pembacaan Terbaru</h6><div class="table-responsive"><table class="table table-hover table-sm"><thead style="background:#f8fafc;"><tr><th>No</th><th>User</th><th>Role</th><th>Judul Buku</th><th>Penulis</th><th>Waktu Baca</th></tr></thead><tbody id="tabelRiwayatTerbaru"></tbody></table></div><div id="emptyTabelRiwayat" style="display:none;" class="text-center py-4 text-muted">Belum ada riwayat</div></div>
+    </div>
+
+    <!-- MANAJEMEN USER -->
+    <div id="manajemenPage" style="display:none;">
+      <div class="top-bar"><h4><i class="fas fa-users me-2"></i>Manajemen User</h4><button class="btn btn-primary" onclick="showAddUserForm()"><i class="fas fa-user-plus me-2"></i>Tambah User</button></div>
+      <div id="formAddUser" style="display:none;background:white;padding:20px;border-radius:12px;" class="mb-3">
+        <h6><i class="fas fa-user-plus me-2"></i>Tambah User Baru</h6>
+        <form onsubmit="event.preventDefault();tambahUser();">
+          <div class="row">
+            <div class="col-md-3"><input id="newUsername" class="form-control mb-2" placeholder="Username" required></div>
+            <div class="col-md-2"><input id="newNama" class="form-control mb-2" placeholder="Nama Lengkap" required></div>
+            <div class="col-md-2"><input id="newPassword" type="password" class="form-control mb-2" placeholder="Password" required></div>
+            <div class="col-md-2"><select id="newRole" class="form-control mb-2" required><option value="">Pilih Role</option><option value="admin">Admin</option><option value="guru">Guru</option><option value="siswa">Siswa</option></select></div>
+            <div class="col-md-2"><input id="newKelas" class="form-control mb-2" placeholder="Kelas (jika siswa)"></div>
+            <div class="col-md-1"><button type="submit" class="btn btn-success w-100">Simpan</button></div>
+          </div>
+        </form>
+      </div>
+      <div class="table-responsive"><table class="table table-hover" style="background:white;"><thead style="background:#f8fafc;"><tr><th>No</th><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Kelas</th><th>Total Bacaan</th><th>Aksi</th></tr></thead><tbody id="userList"></tbody></table></div>
+    </div>
+
+    <!-- PENDAFTAR PAGE -->
+    <div id="pendaftarPage" style="display:none;">
+      <div class="top-bar">
+        <h4><i class="fas fa-user-clock me-2"></i>Permohonan Akun</h4>
+        <div id="pendaftarBadgeContainer"></div>
+      </div>
+      <div id="emptyPending" style="display:none;" class="text-center mt-4"><i class="fas fa-user-check" style="font-size:80px;color:#cbd5e1;"></i><h5 class="mt-3 text-muted">Tidak ada permohonan</h5><p class="text-muted">Semua permohonan sudah diproses</p></div>
+      <div id="pendingList"></div>
+      <div class="chart-container mt-3">
+        <h6 class="mb-3"><i class="fas fa-history me-2 text-secondary"></i>Riwayat Permohonan</h6>
+        <div class="table-responsive"><table class="table table-hover table-sm"><thead style="background:#f8fafc;"><tr><th>No</th><th>Username</th><th>Nama Lengkap</th><th>Role</th><th>Kelas</th><th>Waktu Daftar</th><th>Status</th></tr></thead><tbody id="tabelRiwayatPendaftar"></tbody></table></div>
+        <div id="emptyRiwayatPendaftar" style="display:none;" class="text-center py-3 text-muted">Belum ada riwayat</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal fade" id="resetRiwayatModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border-radius:12px 12px 0 0;"><h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Hapus Riwayat</h5><button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:brightness(0) invert(1);"></button></div><div class="modal-body p-4"><div id="resetRiwayatContent"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Batal</button><button type="button" class="btn btn-danger" onclick="eksekusiResetRiwayat()"><i class="fas fa-trash-alt me-1"></i>Ya, Hapus</button></div></div></div></div>
+<div class="modal fade" id="resetStatistikModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;border-radius:12px 12px 0 0;"><h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Konfirmasi Reset Data</h5><button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:brightness(0) invert(1);"></button></div><div class="modal-body p-4"><div id="resetStatistikContent"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i>Batal</button><button type="button" class="btn btn-danger" onclick="eksekusiResetStatistik()"><i class="fas fa-check me-1"></i>Ya, Reset</button></div></div></div></div>
+<div class="modal fade" id="suksesModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered modal-sm"><div class="modal-content"><div class="modal-body text-center p-4"><div style="font-size:60px;color:#10b981;margin-bottom:15px;">&#x2705;</div><h5 id="suksesText">Berhasil!</h5><p class="text-muted" id="suksesDetail"></p><button class="btn btn-success mt-2" data-bs-dismiss="modal">OK</button></div></div></div></div>
+<div class="modal fade" id="bookDetailModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fas fa-book me-2"></i>Detail Buku</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="book-detail-section"><h6><i class="fas fa-heading"></i> Judul</h6><p id="detailJudul"></p></div><div class="book-detail-section"><h6><i class="fas fa-user-edit"></i> Penulis</h6><p id="detailPenulis"></p></div><div class="book-detail-section"><h6><i class="fas fa-tag"></i> Kategori</h6><p><span class="badge badge-kategori bg-primary" id="detailKategori"></span></p></div><div class="book-detail-section"><h6><i class="fas fa-eye"></i> Statistik</h6><p id="detailStatistik"></p></div><div class="book-detail-section"><h6><i class="fas fa-align-left"></i> Deskripsi</h6><p id="detailDeskripsi" style="text-align:justify;"></p></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button><button type="button" class="btn btn-primary" onclick="bacaBukuFromModal()"><i class="fas fa-book-open me-2"></i>Mulai Baca</button></div></div></div></div>
+<div class="modal fade" id="pdfReaderModal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-scrollable" style="max-width:98vw;margin:8px auto;"><div class="modal-content" style="height:95vh;border-radius:12px;overflow:hidden;"><div class="modal-header py-2 px-3" style="background:#1e3a8a;color:white;border:none;flex-shrink:0;"><div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0"><i class="fas fa-book-open" style="flex-shrink:0;"></i><span id="pdfJudul" style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span></div><button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" style="flex-shrink:0;"></button></div><div class="modal-body p-0" style="flex:1;overflow:hidden;"><iframe id="pdfViewer" style="width:100%;height:100%;border:none;display:block;"></iframe></div></div></div></div>
+
+<script>
+// ---- DATA INIT ----
+const DEFAULT_USERS = [
+  {username:"admin",password:"admin123",role:"admin",namaLengkap:"Administrator",kelas:""},
+  {username:"korawati",password:"30",role:"guru",namaLengkap:"Korawati",kelas:""},
+  {username:"faqih",password:"11",role:"siswa",namaLengkap:"Faqih",kelas:"X RPL 1"},
+  {username:"fira",password:"21",role:"siswa",namaLengkap:"Fira",kelas:""},
+  {username:"adit",password:"bot",role:"siswa",namaLengkap:"Adit",kelas:""}
+];
+let users = JSON.parse(localStorage.getItem("users")) || [];
+users = users.map(u=>({namaLengkap:u.namaLengkap||u.username,kelas:u.kelas||"",...u}));
+DEFAULT_USERS.forEach(d=>{if(!users.find(u=>u.username===d.username))users.push(d);});
+localStorage.setItem("users",JSON.stringify(users));
+
+let buku = JSON.parse(localStorage.getItem("buku")) || [];
+let history = JSON.parse(localStorage.getItem("history")) || [];
+let pendingUsers = JSON.parse(localStorage.getItem("pendingUsers")) || [];
+
+let currentUser=null, currentRole=null, chartInstance=null, currentBookIndex=null;
+let modeSeleksi=false, currentHistoryData=[], resetRiwayatMode='', resetStatistikMode='';
+let roleDaftarDipilih='';
+
+// ---- LOGIN ----
+function showLoginPanel(){
+  document.getElementById('loginPanel').style.display='block';
+  document.getElementById('daftarPanel').style.display='none';
+  document.getElementById('loginNotif').innerHTML='';
+  document.getElementById('roleBadge').style.display='none';
+}
+function showDaftarPanel(){
+  document.getElementById('loginPanel').style.display='none';
+  document.getElementById('daftarPanel').style.display='block';
+  roleDaftarDipilih='';
+  document.getElementById('roleOptGuru').classList.remove('selected');
+  document.getElementById('roleOptSiswa').classList.remove('selected');
+  document.getElementById('kelasField').style.display='none';
+  document.getElementById('daftarKelas').required=false;
+  document.getElementById('daftarNotif').innerHTML='';
+}
+function detectRole(){
+  const uname=document.getElementById('username').value.trim();
+  const badge=document.getElementById('roleBadge');
+  if(!uname){badge.style.display='none';return;}
+  const found=users.find(u=>u.username.toLowerCase()===uname.toLowerCase());
+  if(found){
+    const icons={admin:'&#x1F510; Admin',guru:'&#x1F469;&#x200D;&#x1F3EB; Guru',siswa:'&#x1F393; Siswa'};
+    badge.innerHTML='<i class="fas fa-id-badge me-1"></i>Terdeteksi sebagai: <strong>'+(icons[found.role]||found.role)+'</strong>';
+    badge.style.display='block';
+  } else badge.style.display='none';
+}
+function login(){
+  const uname=document.getElementById('username').value.trim();
+  const pass=document.getElementById('password').value;
+  const notif=document.getElementById('loginNotif');
+  const user=users.find(u=>u.username===uname&&u.password===pass);
+  if(user){
+    currentUser=user.username; currentRole=user.role;
+    localStorage.setItem("userLogin",currentUser); localStorage.setItem("role",currentRole);
+    initApp();
+  } else {
+    const exists=users.find(u=>u.username===uname);
+    if(exists){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-times-circle"></i> Password salah!</div>';}
+    else{
+      const pending=pendingUsers.find(p=>p.username===uname&&p.status==='pending');
+      if(pending) notif.innerHTML='<div class="notif-bar notif-info"><i class="fas fa-hourglass-half"></i> Akun Anda sedang menunggu persetujuan admin.</div>';
+      else notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-times-circle"></i> Username tidak ditemukan!</div>';
+    }
+  }
+}
+
+// ---- DAFTAR ----
+function selectRoleDaftar(role){
+  roleDaftarDipilih=role;
+  document.getElementById('roleOptGuru').classList.toggle('selected',role==='guru');
+  document.getElementById('roleOptSiswa').classList.toggle('selected',role==='siswa');
+  const kf=document.getElementById('kelasField');
+  const ki=document.getElementById('daftarKelas');
+  if(role==='siswa'){kf.style.display='block';ki.required=true;}
+  else{kf.style.display='none';ki.required=false;ki.value='';}
+}
+function daftarAkun(){
+  const notif=document.getElementById('daftarNotif');
+  if(!roleDaftarDipilih){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-exclamation-circle"></i> Pilih peran terlebih dahulu!</div>';return;}
+  const uname=document.getElementById('daftarUsername').value.trim();
+  const nama=document.getElementById('daftarNama').value.trim();
+  const kelas=document.getElementById('daftarKelas').value.trim();
+  const pass=document.getElementById('daftarPassword').value;
+  const konfirm=document.getElementById('daftarKonfirm').value;
+  if(pass!==konfirm){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-times-circle"></i> Password tidak cocok!</div>';return;}
+  if(pass.length<4){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-times-circle"></i> Password minimal 4 karakter!</div>';return;}
+  if(users.find(u=>u.username===uname)||pendingUsers.find(p=>p.username===uname&&p.status==='pending')){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-times-circle"></i> Username sudah digunakan!</div>';return;}
+  if(roleDaftarDipilih==='siswa'&&!kelas){notif.innerHTML='<div class="notif-bar notif-err"><i class="fas fa-exclamation-circle"></i> Kelas wajib diisi untuk siswa!</div>';return;}
+  pendingUsers.push({id:Date.now(),username:uname,password:pass,namaLengkap:nama,role:roleDaftarDipilih,kelas,waktuDaftar:new Date().toISOString(),status:'pending'});
+  localStorage.setItem("pendingUsers",JSON.stringify(pendingUsers));
+  notif.innerHTML='<div class="notif-bar notif-ok"><i class="fas fa-check-circle"></i> Permohonan terkirim! Tunggu persetujuan admin.</div>';
+  ['daftarUsername','daftarNama','daftarKelas','daftarPassword','daftarKonfirm'].forEach(id=>document.getElementById(id).value='');
+  roleDaftarDipilih='';
+  setTimeout(showLoginPanel,3200);
+}
+
+// ---- INIT APP ----
+function initApp(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('displayUsername').innerText=currentUser;
+  document.getElementById('displayRole').innerText=currentRole.toUpperCase();
+  document.getElementById('mobileUserBadge').innerText=currentUser+' \xB7 '+currentRole.toUpperCase();
+  document.getElementById('mobileTopbar').style.removeProperty('display');
+  document.getElementById('mobileTopbar').style.display='flex';
+  if(currentRole!=='admin'){
+    ['menuTambah','menuStatistik','menuManajemen','menuPendaftar','statUser','filterUserCol'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  } else {
+    document.getElementById('statUser').style.display='block';
+    document.getElementById('menuPendaftar').style.display='flex';
+  }
+  renderDashboard(); updateCurrentDate(); updatePendingBadge();
+}
+function logout(){if(confirm('Yakin ingin logout?')){localStorage.removeItem('userLogin');localStorage.removeItem('role');document.getElementById('mobileTopbar').style.setProperty('display','none','important');location.reload();}}
+
+// ---- PENDING ----
+function updatePendingBadge(){
+  const n=pendingUsers.filter(p=>p.status==='pending').length;
+  const b=document.getElementById('sidebarPendingBadge');
+  if(b){b.innerText=n;b.style.display=n>0?'inline-flex':'none';}
+}
+function approveUser(id){
+  const idx=pendingUsers.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  const p=pendingUsers[idx];
+  if(users.find(u=>u.username===p.username)){alert('Username sudah ada!');return;}
+  users.push({username:p.username,password:p.password,role:p.role,namaLengkap:p.namaLengkap,kelas:p.kelas});
+  localStorage.setItem('users',JSON.stringify(users));
+  pendingUsers[idx].status='approved'; pendingUsers[idx].waktuProses=new Date().toISOString();
+  localStorage.setItem('pendingUsers',JSON.stringify(pendingUsers));
+  updatePendingBadge(); renderPendaftar(); renderDashboard();
+  showSuksesModal('Akun Disetujui!',`"${p.username}" (${p.namaLengkap}) sudah dapat login.`);
+}
+function rejectUser(id){
+  if(!confirm('Tolak permohonan ini?'))return;
+  const idx=pendingUsers.findIndex(p=>p.id===id);
+  if(idx<0)return;
+  pendingUsers[idx].status='rejected'; pendingUsers[idx].waktuProses=new Date().toISOString();
+  localStorage.setItem('pendingUsers',JSON.stringify(pendingUsers));
+  updatePendingBadge(); renderPendaftar(); renderDashboard();
+}
+function renderPendaftar(){
+  const pending=pendingUsers.filter(p=>p.status==='pending');
+  const all=[...pendingUsers].reverse();
+  const listEl=document.getElementById('pendingList');
+  const emptyEl=document.getElementById('emptyPending');
+  const bc=document.getElementById('pendaftarBadgeContainer');
+  if(bc) bc.innerHTML=pending.length>0?`<span class="pending-badge-anim"><i class="fas fa-clock me-1"></i>${pending.length} menunggu</span>`:'';
+  if(pending.length===0){listEl.innerHTML='';emptyEl.style.display='block';}
+  else{
+    emptyEl.style.display='none';
+    listEl.innerHTML=pending.map(p=>`
+      <div class="pending-card">
+        <div class="d-flex align-items-center gap-3">
+          <div style="width:48px;height:48px;background:${p.role==='guru'?'#fef3c7':'#dbeafe'};border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fas fa-${p.role==='guru'?'chalkboard-teacher':'user-graduate'}" style="color:${p.role==='guru'?'#d97706':'#3b82f6'};font-size:20px;"></i>
+          </div>
+          <div>
+            <div class="fw-bold">${p.namaLengkap}</div>
+            <div class="text-muted" style="font-size:12px;">@${p.username}</div>
+            <div style="font-size:12px;">
+              <span class="badge bg-${p.role==='guru'?'warning text-dark':'info'}">${p.role.toUpperCase()}</span>
+              ${p.kelas?`<span class="badge bg-secondary ms-1">${p.kelas}</span>`:''}
+            </div>
+            <div class="text-muted mt-1" style="font-size:11px;"><i class="fas fa-clock me-1"></i>${formatDate(p.waktuDaftar)}</div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-column align-items-end">
+          <button class="btn btn-sm btn-success" onclick="approveUser(${p.id})"><i class="fas fa-check me-1"></i>Setujui</button>
+          <button class="btn btn-sm btn-danger" onclick="rejectUser(${p.id})"><i class="fas fa-times me-1"></i>Tolak</button>
+        </div>
+      </div>`).join('');
+  }
+  const tabel=document.getElementById('tabelRiwayatPendaftar');
+  const emptyRw=document.getElementById('emptyRiwayatPendaftar');
+  if(all.length===0){tabel.innerHTML='';emptyRw.style.display='block';}
+  else{
+    emptyRw.style.display='none';
+    tabel.innerHTML=all.map((p,i)=>{
+      const sc=p.status==='approved'?'success':p.status==='rejected'?'danger':'warning';
+      const st=p.status==='approved'?'Disetujui':p.status==='rejected'?'Ditolak':'Menunggu';
+      return `<tr><td>${i+1}</td><td><strong>${p.username}</strong></td><td>${p.namaLengkap}</td><td><span class="badge bg-${p.role==='guru'?'warning text-dark':'info'}">${p.role.toUpperCase()}</span></td><td>${p.kelas||'-'}</td><td><small>${formatDate(p.waktuDaftar)}</small></td><td><span class="badge bg-${sc}">${st}</span>${p.waktuProses?`<br><small class="text-muted">${formatDate(p.waktuProses)}</small>`:''}</td></tr>`;
+    }).join('');
+  }
+}
+
+// ---- DASHBOARD ----
+function renderDashboard(){
+  document.getElementById('totalBuku').innerText=buku.length;
+  if(currentRole==='admin'){
+    document.getElementById('labelBacaDashboard').innerText='Total Pembacaan';
+    document.getElementById('totalBaca').innerText=history.length;
+    document.getElementById('totalUser').innerText=users.length;
+    const s=[...buku].sort((a,b)=>b.baca-a.baca);
+    document.getElementById('bukuPopuler').innerText=s[0]?s[0].baca+'x':'-';
+    document.getElementById('adminDashboardView').style.display='block';
+    document.getElementById('userDashboardView').style.display='none';
+    renderRecentActivity(); renderChart(); renderPendingDashboard();
+  } else {
+    const uh=history.filter(h=>h.user===currentUser);
+    document.getElementById('labelBacaDashboard').innerText='Buku Saya Dibaca';
+    document.getElementById('totalBaca').innerText=uh.length;
+    const s=[...buku].sort((a,b)=>b.baca-a.baca);
+    document.getElementById('bukuPopuler').innerText=s[0]?s[0].baca+'x':'-';
+    document.getElementById('adminDashboardView').style.display='none';
+    document.getElementById('userDashboardView').style.display='block';
+    renderTopBukuUser(); renderRiwayatDashboardUser();
+  }
+}
+function renderPendingDashboard(){
+  const pending=pendingUsers.filter(p=>p.status==='pending');
+  const c=document.getElementById('pendingNotifDashboard');
+  const l=document.getElementById('pendingPreviewList');
+  if(pending.length===0){c.style.display='none';return;}
+  c.style.display='block';
+  l.innerHTML=pending.slice(0,3).map(p=>`
+    <div class="pending-card">
+      <div class="d-flex align-items-center gap-2">
+        <i class="fas fa-user-plus text-warning" style="font-size:20px;flex-shrink:0;"></i>
+        <div>
+          <strong>${p.namaLengkap}</strong>
+          <span class="badge bg-${p.role==='guru'?'warning text-dark':'info'} ms-1">${p.role.toUpperCase()}</span>
+          ${p.kelas?`<span class="badge bg-secondary ms-1">${p.kelas}</span>`:''}
+          <div class="text-muted" style="font-size:11px;">@${p.username} &middot; ${formatDate(p.waktuDaftar)}</div>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-xs btn-success" onclick="approveUser(${p.id})"><i class="fas fa-check"></i></button>
+        <button class="btn btn-xs btn-danger" onclick="rejectUser(${p.id})"><i class="fas fa-times"></i></button>
+      </div>
+    </div>`).join('');
+  if(pending.length>3) l.innerHTML+=`<p class="text-muted text-center" style="font-size:13px;">+ ${pending.length-3} permohonan lainnya</p>`;
+}
+
+// ---- SIDEBAR ----
+function toggleSidebar(){if(window.innerWidth<=768){toggleSidebarMobile();return;}document.getElementById('sidebar').classList.toggle('collapsed');document.getElementById('content').classList.toggle('expanded');}
+function toggleSidebarMobile(){const s=document.getElementById('sidebar');const o=document.getElementById('sidebarOverlay');const ic=document.getElementById('hamburgerIcon');const open=s.classList.contains('mobile-open');if(open){s.classList.remove('mobile-open');o.classList.remove('active');ic.className='fas fa-bars';}else{s.classList.add('mobile-open');o.classList.add('active');ic.className='fas fa-times';}}
+function closeSidebarMobile(){document.getElementById('sidebar').classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('active');document.getElementById('hamburgerIcon').className='fas fa-bars';}
+
+function showPage(page){
+  if(window.innerWidth<=768)closeSidebarMobile();
+  if(document.getElementById('statistikPage').style.display!=='none'){[chartPopulerInstance,chartKategoriInstance,chartUserInstance].forEach(c=>{if(c){c.destroy();}});chartPopulerInstance=chartKategoriInstance=chartUserInstance=null;}
+  ['dashboard','buku','tambah','riwayat','statistik','manajemen','pendaftar'].forEach(p=>document.getElementById(p+'Page').style.display='none');
+  document.getElementById(page+'Page').style.display='block';
+  document.querySelectorAll('.sidebar-menu a').forEach(a=>a.classList.remove('active'));
+  const ev=window.event; if(ev&&ev.target){let el=ev.target;while(el&&el.tagName!=='A')el=el.parentElement;if(el)el.classList.add('active');}
+  if(page==='dashboard')renderDashboard();
+  if(page==='buku')renderBuku();
+  if(page==='riwayat')renderRiwayat();
+  if(page==='statistik')renderStatistik();
+  if(page==='manajemen')renderManajemenUser();
+  if(page==='pendaftar')renderPendaftar();
+}
+
+// ---- BUKU ----
+function tambahBuku(){
+  const j=document.getElementById('judul').value;const p=document.getElementById('penulis').value;const k=document.getElementById('kategori').value;const d=document.getElementById('deskripsi').value;const f=document.getElementById('pdfFile').files[0];
+  if(!f){alert('Pilih file PDF!');return;}if(f.size>10*1024*1024){alert('File max 10MB!');return;}
+  const r=new FileReader();r.onload=function(){buku.push({id:Date.now(),judul:j,penulis:p,kategori:k,deskripsi:d,file:r.result,baca:0,tanggalTambah:new Date().toISOString()});localStorage.setItem('buku',JSON.stringify(buku));alert('Buku berhasil ditambahkan!');['judul','penulis','deskripsi'].forEach(id=>document.getElementById(id).value='');document.getElementById('kategori').value='';document.getElementById('pdfFile').value='';showPage('buku');};r.readAsDataURL(f);
+}
+function showBookDetail(idx){currentBookIndex=idx;const b=buku[idx];document.getElementById('detailJudul').innerText=b.judul;document.getElementById('detailPenulis').innerText=b.penulis;document.getElementById('detailKategori').innerText=b.kategori;document.getElementById('detailStatistik').innerText='Telah dibaca '+b.baca+' kali';document.getElementById('detailDeskripsi').innerText=b.deskripsi||'Tidak ada deskripsi';new bootstrap.Modal(document.getElementById('bookDetailModal')).show();}
+function bacaBukuFromModal(){if(currentBookIndex!==null){bootstrap.Modal.getInstance(document.getElementById('bookDetailModal')).hide();bacaBuku(currentBookIndex);}}
+function bacaBuku(idx){const b=buku[idx];buku[idx].baca++;history.push({user:currentUser,role:currentRole,judul:b.judul,penulis:b.penulis,waktu:new Date().toISOString()});localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));document.getElementById('pdfJudul').innerText=b.judul;document.getElementById('pdfViewer').src=b.file;new bootstrap.Modal(document.getElementById('pdfReaderModal')).show();if(document.getElementById('dashboardPage').style.display!=='none')renderDashboard();}
+function hapusBuku(idx){if(confirm('Yakin hapus "'+buku[idx].judul+'"?')){buku.splice(idx,1);localStorage.setItem('buku',JSON.stringify(buku));renderBuku();alert('Buku dihapus!');}}
+function renderBuku(){
+  const el=document.getElementById('listBuku');const em=document.getElementById('emptyBuku');
+  const sv=document.getElementById('searchBuku').value.toLowerCase();const kv=document.getElementById('filterKategori').value;
+  if(buku.length===0){el.innerHTML='';em.style.display='block';return;}em.style.display='none';
+  let fb=buku.filter(b=>(b.judul.toLowerCase().includes(sv)||b.penulis.toLowerCase().includes(sv))&&(kv===''||b.kategori===kv));
+  if(fb.length===0){el.innerHTML='<div class="col-12 text-center mt-5"><p class="text-muted">Tidak ada buku yang sesuai</p></div>';return;}
+  el.innerHTML=fb.map(b=>{const oi=buku.indexOf(b);return `<div class="col-md-3"><div class="book-card"><div class="book-icon"><i class="fas fa-book"></i></div><h6>${b.judul}</h6><small><i class="fas fa-user"></i> ${b.penulis}</small><div class="book-stats"><span><i class="fas fa-tag"></i> ${b.kategori}</span><span><i class="fas fa-eye"></i> ${b.baca}x</span></div><div class="btn-group w-100"><button class="btn btn-sm btn-info" onclick="showBookDetail(${oi})"><i class="fas fa-info-circle"></i></button><button class="btn btn-sm btn-primary" onclick="bacaBuku(${oi})"><i class="fas fa-book-open"></i> Baca</button>${currentRole==='admin'?`<button class="btn btn-sm btn-danger" onclick="hapusBuku(${oi})"><i class="fas fa-trash"></i></button>`:''}</div></div></div>`;}).join('');
+}
+
+// ---- RIWAYAT ----
+function renderRiwayat(){
+  const bc=document.getElementById('riwayatButtons');
+  if(currentRole==='admin') bc.innerHTML=`<button class="btn btn-sm btn-outline-secondary" id="btnPilihRiwayat" onclick="toggleModeSeleksi()"><i class="fas fa-check-square me-1"></i>Pilih</button><button class="btn btn-sm btn-warning" onclick="showResetRiwayatModal('user')"><i class="fas fa-user-times me-1"></i>Hapus per User</button><button class="btn btn-sm btn-info" onclick="showResetRiwayatModal('buku')"><i class="fas fa-book me-1"></i>Hapus per Buku</button><button class="btn btn-sm btn-danger" onclick="showResetRiwayatModal('all')"><i class="fas fa-trash-alt me-1"></i>Hapus Semua</button>`;
+  else bc.innerHTML=`<button class="btn btn-sm btn-outline-secondary" id="btnPilihRiwayat" onclick="toggleModeSeleksi()"><i class="fas fa-check-square me-1"></i>Pilih</button><button class="btn btn-sm btn-danger" onclick="showHapusSemua()"><i class="fas fa-trash-alt me-1"></i>Hapus Semua</button>`;
+  const fu=document.getElementById('filterUser');const ftm=document.getElementById('filterTanggalMulai').value;const fta=document.getElementById('filterTanggalAkhir').value;const fb=document.getElementById('filterBuku').value.toLowerCase();
+  if(currentRole==='admin'){fu.style.display='block';const uu=[...new Set(history.map(h=>h.user))];const cur=fu.value;fu.innerHTML='<option value="all">Semua User</option>'+uu.map(u=>`<option value="${u}"${u===cur?' selected':''}>${u}</option>`).join('');}else fu.style.display='none';
+  let hd=currentRole==='admin'?(fu.value==='all'?history:history.filter(h=>h.user===fu.value)):history.filter(h=>h.user===currentUser);
+  if(ftm)hd=hd.filter(h=>new Date(h.waktu).toISOString().split('T')[0]>=ftm);
+  if(fta)hd=hd.filter(h=>new Date(h.waktu).toISOString().split('T')[0]<=fta);
+  if(fb)hd=hd.filter(h=>h.judul.toLowerCase().includes(fb));
+  hd=hd.map(h=>{const i=history.indexOf(h);return{...h,_idx:i}}).reverse();
+  currentHistoryData=hd;document.getElementById('totalRiwayat').innerText='Total: '+hd.length+' riwayat';document.getElementById('checkAll').checked=false;updateSeleksiInfo();
+  const rl=document.getElementById('riwayatList');const er=document.getElementById('emptyRiwayat');
+  if(hd.length===0){rl.innerHTML='';er.style.display='block';return;}er.style.display='none';
+  rl.className=modeSeleksi?'mode-seleksi-aktif':'';
+  rl.innerHTML=hd.map((h,i)=>{const bu=currentRole==='admin'?`<span class="badge bg-info me-1">${h.user}</span>`:'';const br=currentRole==='admin'?`<span class="badge bg-${h.role==='guru'?'warning':'primary'} me-1">${(h.role||'siswa').toUpperCase()}</span>`:'';return `<div class="history-item history-item-selectable" id="item-${h._idx}" onclick="handleItemClick(event,${h._idx})"><div class="item-checkbox"><input type="checkbox" id="chk-${h._idx}" data-idx="${h._idx}" onchange="updateSeleksiInfo()" onclick="event.stopPropagation()"></div><div class="d-flex align-items-center gap-2 flex-grow-1"><span class="text-muted" style="font-size:13px;min-width:28px;">${i+1}.</span><div>${bu}${br}membaca <strong>${h.judul}</strong>${h.penulis?` <span class="text-muted">oleh ${h.penulis}</span>`:''}</div></div><div class="d-flex align-items-center gap-2 ms-2"><small class="text-muted text-nowrap"><i class="fas fa-clock"></i> ${formatDate(h.waktu)}</small>${currentRole==='admin'?`<button class="btn btn-xs btn-outline-danger history-item-hapus" onclick="hapusSatuRiwayat(event,${h._idx})"><i class="fas fa-times"></i></button>`:''}</div></div>`;}).join('');
+}
+function resetFilter(){['filterUser','filterTanggalMulai','filterTanggalAkhir','filterBuku'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='filterUser'?'all':'';});renderRiwayat();}
+function toggleModeSeleksi(){modeSeleksi=!modeSeleksi;const tb=document.getElementById('toolbarSeleksi');const btn=document.getElementById('btnPilihRiwayat');if(modeSeleksi){tb.style.display='block';if(btn){btn.innerHTML='<i class="fas fa-times me-1"></i>Batal';btn.className='btn btn-sm btn-secondary';}}else{tb.style.display='none';if(btn){btn.innerHTML='<i class="fas fa-check-square me-1"></i>Pilih';btn.className='btn btn-sm btn-outline-secondary';}}renderRiwayat();}
+function handleItemClick(e,idx){if(!modeSeleksi)return;const c=document.getElementById('chk-'+idx);if(c&&e.target!==c){c.checked=!c.checked;updateSeleksiInfo();}const item=document.getElementById('item-'+idx);if(item)item.classList.toggle('selected',c.checked);}
+function toggleCheckAll(mc){document.querySelectorAll('[id^="chk-"]').forEach(c=>{c.checked=mc.checked;const item=document.getElementById('item-'+c.dataset.idx);if(item)item.classList.toggle('selected',mc.checked);});updateSeleksiInfo();}
+function updateSeleksiInfo(){const n=document.querySelectorAll('[id^="chk-"]:checked').length;document.getElementById('jumlahDipilih').innerText=n+' dipilih';document.getElementById('countTerpilih').innerText=n;const btn=document.getElementById('btnHapusTerpilih');if(btn)btn.disabled=n===0;}
+function hapusSatuRiwayat(e,gi){e.stopPropagation();const item=history[gi];if(!item)return;if(!confirm('Hapus riwayat?\n"'+item.user+'" membaca "'+item.judul+'"?'))return;const bi=buku.findIndex(b=>b.judul===item.judul);if(bi>-1&&buku[bi].baca>0)buku[bi].baca--;history.splice(gi,1);localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));renderRiwayat();renderDashboard();}
+function hapusRiwayatTerpilih(){const checked=[...document.querySelectorAll('[id^="chk-"]:checked')];if(!checked.length)return;if(!confirm('Yakin hapus '+checked.length+' riwayat?'))return;const idx=checked.map(c=>parseInt(c.dataset.idx)).sort((a,b)=>b-a);idx.forEach(gi=>{const item=history[gi];if(!item)return;const bi=buku.findIndex(b=>b.judul===item.judul);if(bi>-1&&buku[bi].baca>0)buku[bi].baca--;history.splice(gi,1);});localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));modeSeleksi=false;document.getElementById('toolbarSeleksi').style.display='none';renderRiwayat();renderDashboard();showSuksesModal('Riwayat Dihapus!',idx.length+' riwayat berhasil dihapus.');}
+function showHapusSemua(){const mh=history.filter(h=>h.user===currentUser);if(!mh.length){showSuksesModal('Tidak Ada Riwayat','Belum ada riwayat bacaan.');return;}document.getElementById('resetRiwayatContent').innerHTML='<div class="text-center mb-3"><i class="fas fa-trash-alt" style="font-size:50px;color:#ef4444;"></i></div><h6 class="text-center mb-3">Hapus Semua Riwayat Bacaan Anda?</h6><div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Menghapus <strong>'+mh.length+' data</strong> riwayat Anda. Tidak dapat dikembalikan!</div>';resetRiwayatMode='selfAll';new bootstrap.Modal(document.getElementById('resetRiwayatModal')).show();}
+function showResetRiwayatModal(mode){resetRiwayatMode=mode;let c='';if(mode==='all'){c='<div class="text-center mb-3"><i class="fas fa-trash-alt" style="font-size:50px;color:#ef4444;"></i></div><h6 class="text-center mb-3">Hapus <strong>Semua Riwayat?</strong></h6><div class="alert alert-danger">Menghapus '+history.length+' riwayat semua user dan mereset counter buku.</div>';}else if(mode==='user'){const uu=[...new Set(history.map(h=>h.user))];if(!uu.length){showSuksesModal('Tidak Ada','');return;}c='<div class="text-center mb-3"><i class="fas fa-user-times" style="font-size:50px;color:#f59e0b;"></i></div><h6 class="text-center mb-3">Hapus Riwayat per User</h6><select id="selectResetUser" class="form-control mb-3" onchange="updateUserResetInfo()"><option value="">-- Pilih User --</option>'+uu.map(u=>`<option value="${u}">${u} (${history.filter(h=>h.user===u).length})</option>`).join('')+'</select><div id="userResetInfo" class="alert alert-warning" style="display:none;"></div>';}else if(mode==='buku'){const ub=[...new Set(history.map(h=>h.judul))];if(!ub.length){showSuksesModal('Tidak Ada','');return;}c='<div class="text-center mb-3"><i class="fas fa-book" style="font-size:50px;color:#3b82f6;"></i></div><h6 class="text-center mb-3">Hapus Riwayat per Buku</h6><select id="selectResetBuku" class="form-control mb-3" onchange="updateBukuResetInfo()"><option value="">-- Pilih Buku --</option>'+ub.map(j=>`<option value="${j}">${j} (${history.filter(h=>h.judul===j).length})</option>`).join('')+'</select><div id="bukuResetInfo" class="alert alert-warning" style="display:none;"></div>';}
+  document.getElementById('resetRiwayatContent').innerHTML=c;new bootstrap.Modal(document.getElementById('resetRiwayatModal')).show();
+}
+function updateUserResetInfo(){const s=document.getElementById('selectResetUser').value;const el=document.getElementById('userResetInfo');if(!s){el.style.display='none';return;}el.style.display='block';el.innerHTML='Hapus <strong>'+history.filter(h=>h.user===s).length+' riwayat</strong> milik <strong>'+s+'</strong>.';}
+function updateBukuResetInfo(){const s=document.getElementById('selectResetBuku').value;const el=document.getElementById('bukuResetInfo');if(!s){el.style.display='none';return;}el.style.display='block';el.innerHTML='Hapus <strong>'+history.filter(h=>h.judul===s).length+' riwayat</strong> buku "<strong>'+s+'</strong>".';}
+function eksekusiResetRiwayat(){
+  const hm=bootstrap.Modal.getInstance(document.getElementById('resetRiwayatModal'));
+  if(resetRiwayatMode==='all'){const t=history.length;history=[];buku.forEach(b=>b.baca=0);localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderRiwayat();renderDashboard();showSuksesModal('Semua Dihapus!',t+' riwayat dihapus.');}
+  else if(resetRiwayatMode==='selfAll'){const mh=history.filter(h=>h.user===currentUser);const t=mh.length;mh.forEach(h=>{const bi=buku.findIndex(b=>b.judul===h.judul);if(bi>-1&&buku[bi].baca>0)buku[bi].baca--;});history=history.filter(h=>h.user!==currentUser);localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderRiwayat();renderDashboard();showSuksesModal('Dihapus!',t+' riwayat dihapus.');}
+  else if(resetRiwayatMode==='user'){const su=document.getElementById('selectResetUser')?.value;if(!su){alert('Pilih user!');return;}const t=history.filter(h=>h.user===su).length;history.filter(h=>h.user===su).forEach(h=>{const bi=buku.findIndex(b=>b.judul===h.judul);if(bi>-1&&buku[bi].baca>0)buku[bi].baca--;});history=history.filter(h=>h.user!==su);localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderRiwayat();renderDashboard();showSuksesModal('Dihapus!',t+' riwayat "'+su+'" dihapus.');}
+  else if(resetRiwayatMode==='buku'){const sb=document.getElementById('selectResetBuku')?.value;if(!sb){alert('Pilih buku!');return;}const t=history.filter(h=>h.judul===sb).length;history=history.filter(h=>h.judul!==sb);const bi=buku.findIndex(b=>b.judul===sb);if(bi>-1)buku[bi].baca=0;localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderRiwayat();renderDashboard();showSuksesModal('Dihapus!',t+' riwayat "'+sb+'" dihapus.');}
+}
+
+// ---- STATISTIK ----
+let chartPopulerInstance=null,chartKategoriInstance=null,chartUserInstance=null;
+function renderStatistik(){
+  document.getElementById('statTotalBuku').innerText=buku.length;document.getElementById('statTotalBaca').innerText=history.length;document.getElementById('statTotalUser').innerText=users.length;
+  const sb=[...buku].sort((a,b)=>b.baca-a.baca);if(sb.length){document.getElementById('statBukuPopuler').innerText=sb[0].baca+'x';document.getElementById('statNamaBukuPopuler').innerText=sb[0].judul.substring(0,25)+(sb[0].judul.length>25?'...':'');}else{document.getElementById('statBukuPopuler').innerText='0';document.getElementById('statNamaBukuPopuler').innerText='-';}
+  if(chartPopulerInstance){chartPopulerInstance.destroy();chartPopulerInstance=null;}
+  const top10=[...buku].sort((a,b)=>b.baca-a.baca).slice(0,10);const bgC=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+  if(!top10.length){document.getElementById('chartPopuler').style.display='none';document.getElementById('emptyChartPopuler').style.display='block';}
+  else{document.getElementById('chartPopuler').style.display='block';document.getElementById('emptyChartPopuler').style.display='none';chartPopulerInstance=new Chart(document.getElementById('chartPopuler'),{type:'bar',data:{labels:top10.map(b=>b.judul.length>25?b.judul.substring(0,25)+'...':b.judul),datasets:[{data:top10.map(b=>b.baca),backgroundColor:bgC.slice(0,top10.length),borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,precision:0}},y:{grid:{display:false}}}}});}
+  if(chartKategoriInstance){chartKategoriInstance.destroy();chartKategoriInstance=null;}
+  const kj={};buku.forEach(b=>{const k=b.kategori||'Lainnya';kj[k]=(kj[k]||0)+1;});
+  if(!Object.keys(kj).length){document.getElementById('chartKategori').style.display='none';document.getElementById('emptyChartKategori').style.display='block';}
+  else{document.getElementById('chartKategori').style.display='block';document.getElementById('emptyChartKategori').style.display='none';chartKategoriInstance=new Chart(document.getElementById('chartKategori'),{type:'doughnut',data:{labels:Object.keys(kj),datasets:[{data:Object.values(kj),backgroundColor:bgC.slice(0,Object.keys(kj).length),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom',labels:{padding:15,font:{size:12}}}},cutout:'60%'}});}
+  if(chartUserInstance){chartUserInstance.destroy();chartUserInstance=null;}
+  const ua={};history.forEach(h=>{ua[h.user]=(ua[h.user]||0)+1;});
+  if(!Object.keys(ua).length){document.getElementById('chartUser').style.display='none';document.getElementById('emptyChartUser').style.display='block';}
+  else{document.getElementById('chartUser').style.display='block';document.getElementById('emptyChartUser').style.display='none';const ul=Object.keys(ua);const ur=ul.map(u=>{const f=users.find(us=>us.username===u);return f?f.role:'unknown';});const uc=ur.map(r=>r==='admin'?'#ef4444':r==='guru'?'#f59e0b':'#3b82f6');chartUserInstance=new Chart(document.getElementById('chartUser'),{type:'bar',data:{labels:ul,datasets:[{data:Object.values(ua),backgroundColor:uc,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,precision:0}},x:{grid:{display:false}}}}});}
+  const su2=Object.entries(ua).sort(([,a],[,b])=>b-a).slice(0,5);const medals=['&#x1F947;','&#x1F948;','&#x1F949;','4&#xFE0F;&#x20E3;','5&#xFE0F;&#x20E3;'];
+  document.getElementById('topUserList').innerHTML=!su2.length?'<div class="text-center py-4 text-muted"><i class="fas fa-users fa-3x mb-2"></i><br>Belum ada aktivitas</div>':su2.map(([u,c],i)=>{const uo=users.find(us=>us.username===u);const role=uo?uo.role:'unknown';const bc=role==='admin'?'danger':role==='guru'?'warning':'info';return `<div class="history-item"><div class="d-flex align-items-center gap-2"><span style="font-size:22px;">${medals[i]}</span><div><strong>${u}</strong><br><span class="badge bg-${bc}" style="font-size:10px;">${role.toUpperCase()}</span></div></div><span class="badge bg-primary" style="font-size:13px;">${c}x</span></div>`;}).join('');
+  const rt=[...history].reverse().slice(0,20);document.getElementById('emptyTabelRiwayat').style.display=rt.length?'none':'block';document.getElementById('tabelRiwayatTerbaru').innerHTML=rt.map((h,i)=>{const uo=users.find(u=>u.username===h.user);const role=uo?uo.role:(h.role||'-');const bc=role==='admin'?'danger':role==='guru'?'warning':'info';return `<tr><td>${i+1}</td><td><strong>${h.user}</strong></td><td><span class="badge bg-${bc}">${role.toUpperCase()}</span></td><td>${h.judul}</td><td>${h.penulis||'-'}</td><td><small>${formatDate(h.waktu)}</small></td></tr>`;}).join('');
+}
+function showResetStatistikModal(mode){resetStatistikMode=mode;let c='';if(mode==='counter')c='<div class="text-center mb-3"><i class="fas fa-undo" style="font-size:50px;color:#f59e0b;"></i></div><h6 class="text-center mb-3">Reset Counter Pembacaan?</h6><div class="alert alert-warning">Mereset angka pembacaan semua buku ke 0. Riwayat tetap ada.</div><p class="text-muted text-center">Total: <strong>'+buku.length+' buku</strong></p>';else c='<div class="text-center mb-3"><i class="fas fa-database" style="font-size:50px;color:#ef4444;"></i></div><h6 class="text-center mb-3">Reset Semua Data?</h6><div class="alert alert-danger">Menghapus '+history.length+' riwayat + semua counter buku. Tidak dapat dikembalikan!</div>';document.getElementById('resetStatistikContent').innerHTML=c;new bootstrap.Modal(document.getElementById('resetStatistikModal')).show();}
+function eksekusiResetStatistik(){const hm=bootstrap.Modal.getInstance(document.getElementById('resetStatistikModal'));if(resetStatistikMode==='counter'){buku.forEach(b=>b.baca=0);localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderStatistik();renderDashboard();showSuksesModal('Counter Direset!','Counter '+buku.length+' buku direset ke 0.');}else{const t=history.length;history=[];buku.forEach(b=>b.baca=0);localStorage.setItem('history',JSON.stringify(history));localStorage.setItem('buku',JSON.stringify(buku));hm.hide();renderStatistik();renderDashboard();showSuksesModal('Semua Direset!',t+' riwayat dan semua counter direset.');}}
+
+// ---- MANAJEMEN USER ----
+function showAddUserForm(){const f=document.getElementById('formAddUser');f.style.display=f.style.display==='none'?'block':'none';}
+function tambahUser(){const u=document.getElementById('newUsername').value;const p=document.getElementById('newPassword').value;const r=document.getElementById('newRole').value;const n=document.getElementById('newNama').value||u;const k=document.getElementById('newKelas').value||'';if(users.find(x=>x.username===u)){alert('Username sudah digunakan!');return;}users.push({username:u,password:p,role:r,namaLengkap:n,kelas:k});localStorage.setItem('users',JSON.stringify(users));alert('User ditambahkan!');['newUsername','newNama','newPassword','newKelas'].forEach(id=>document.getElementById(id).value='');document.getElementById('newRole').value='';renderManajemenUser();showAddUserForm();}
+function hapusUser(u){if(u==='admin'){alert('Tidak bisa hapus admin utama!');return;}if(confirm('Hapus user "'+u+'"?')){users=users.filter(x=>x.username!==u);localStorage.setItem('users',JSON.stringify(users));renderManajemenUser();alert('User dihapus!');}}
+function renderManajemenUser(){document.getElementById('userList').innerHTML=users.map((u,i)=>{const b=history.filter(h=>h.user===u.username).length;return `<tr><td>${i+1}</td><td><strong>${u.username}</strong></td><td>${u.namaLengkap||'-'}</td><td><span class="badge bg-${u.role==='admin'?'danger':u.role==='guru'?'warning':'info'}">${u.role.toUpperCase()}</span></td><td>${u.kelas||'-'}</td><td>${b}</td><td>${u.username!=='admin'?`<button class="btn btn-sm btn-danger" onclick="hapusUser('${u.username}')"><i class="fas fa-trash"></i> Hapus</button>`:'<small class="text-muted">Protected</small>'}</td></tr>`;}).join('');}
+
+// ---- CHART & TOP BUKU ----
+function renderTopBukuUser(){const el=document.getElementById('topBukuList');const em=document.getElementById('emptyTopBuku');if(!buku.length){el.innerHTML='';em.style.display='block';return;}em.style.display='none';const t6=[...buku].sort((a,b)=>b.baca-a.baca).slice(0,6);const m=['&#x1F947;','&#x1F948;','&#x1F949;','4&#xFE0F;&#x20E3;','5&#xFE0F;&#x20E3;','6&#xFE0F;&#x20E3;'];const rc=['#f59e0b','#94a3b8','#cd7c2f','#3b82f6','#3b82f6','#3b82f6'];el.innerHTML=t6.map((b,i)=>{const oi=buku.indexOf(b);const bw=t6[0].baca>0?Math.round((b.baca/t6[0].baca)*100):0;return `<div class="col-md-6"><div class="top-buku-card" onclick="showBookDetail(${oi})" style="cursor:pointer;"><div class="d-flex align-items-center gap-3"><div class="rank-badge" style="background:${rc[i]};">${m[i]}</div><div class="flex-grow-1 min-w-0"><div class="d-flex justify-content-between align-items-start"><div class="me-2"><div class="fw-semibold text-dark" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="${b.judul}">${b.judul}</div><small class="text-muted"><i class="fas fa-user me-1"></i>${b.penulis}</small></div><div class="text-end flex-shrink-0"><span class="badge bg-primary">${b.baca}x</span><br><span class="badge bg-light text-dark" style="font-size:10px;">${b.kategori}</span></div></div><div class="progress mt-2" style="height:6px;border-radius:3px;"><div class="progress-bar" style="width:${bw}%;background:${rc[i]};"></div></div></div></div><div class="mt-2 d-flex gap-2"><button class="btn btn-xs btn-primary flex-grow-1" onclick="event.stopPropagation();bacaBuku(${oi})"><i class="fas fa-book-open me-1"></i>Baca</button><button class="btn btn-xs btn-outline-info" onclick="event.stopPropagation();showBookDetail(${oi})"><i class="fas fa-info-circle"></i></button></div></div></div>`;}).join('');}
+function renderRiwayatDashboardUser(){const el=document.getElementById('recentListUser');const uh=history.filter(h=>h.user===currentUser).slice(-8).reverse();document.getElementById('totalRiwayatDashboard').innerText=history.filter(h=>h.user===currentUser).length+' total bacaan';if(!uh.length){el.innerHTML='<p class="text-muted text-center py-3">Belum ada riwayat bacaan.</p>';return;}el.innerHTML=uh.map(h=>`<div class="history-item"><div class="d-flex align-items-center gap-2"><i class="fas fa-book-open" style="color:#3b82f6;"></i><div><strong>${h.judul}</strong>${h.penulis?`<small class="text-muted d-block">oleh ${h.penulis}</small>`:''}</div></div><small class="text-muted text-nowrap ms-2"><i class="fas fa-clock me-1"></i>${formatDate(h.waktu)}</small></div>`).join('');}
+function renderChart(){const ctx=document.getElementById('chartBuku').getContext('2d');if(chartInstance)chartInstance.destroy();if(!buku.length){ctx.font='16px Arial';ctx.fillStyle='#94a3b8';ctx.textAlign='center';ctx.fillText('Belum ada data buku',ctx.canvas.width/2,ctx.canvas.height/2);return;}chartInstance=new Chart(ctx,{type:'bar',data:{labels:buku.map(b=>b.judul.substring(0,20)+(b.judul.length>20?'...':'')),datasets:[{label:'Dibaca',data:buku.map(b=>b.baca),backgroundColor:'rgba(59,130,246,0.8)',borderColor:'rgba(59,130,246,1)',borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});}
+function renderRecentActivity(){const el=document.getElementById('recentList');const data=history.slice(-10).reverse();if(!data.length){el.innerHTML='<p class="text-muted text-center">Belum ada aktivitas</p>';return;}el.innerHTML=data.map(h=>{const rc=h.role==='guru'?'warning':h.role==='admin'?'danger':'info';return `<div class="history-item"><div class="d-flex align-items-center gap-2"><i class="fas fa-book-reader" style="color:#3b82f6;"></i><div><span class="badge bg-${rc}">${h.user}</span> membaca <strong>${h.judul}</strong></div></div><small class="text-muted text-nowrap">${formatDate(h.waktu)}</small></div>`;}).join('');}
+
+// ---- UTILS ----
+function showSuksesModal(judul,detail){document.getElementById('suksesText').innerText=judul;document.getElementById('suksesDetail').innerText=detail;new bootstrap.Modal(document.getElementById('suksesModal')).show();}
+function formatDate(iso){return new Date(iso).toLocaleDateString('id-ID',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function updateCurrentDate(){document.getElementById('currentDate').innerText=new Date().toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+
+// ---- AUTO LOGIN ----
+window.onload=function(){
+  const su=localStorage.getItem('userLogin');const sr=localStorage.getItem('role');
+  if(su&&sr){currentUser=su;currentRole=sr;document.getElementById('displayUsername').innerText=su;document.getElementById('displayRole').innerText=sr.toUpperCase();document.getElementById('mobileUserBadge').innerText=su+' \xB7 '+sr.toUpperCase();document.getElementById('mobileTopbar').style.display='flex';if(sr!=='admin'){['menuTambah','menuStatistik','menuManajemen','menuPendaftar','statUser','filterUserCol'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});}else{document.getElementById('statUser').style.display='block';document.getElementById('menuPendaftar').style.display='flex';}document.getElementById('loginPage').style.display='none';document.getElementById('mainApp').style.display='block';renderDashboard();updateCurrentDate();updatePendingBadge();}
+};
+</script>
+</body>
+</html>
